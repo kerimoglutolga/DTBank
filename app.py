@@ -21,12 +21,17 @@ def login():
     con = mysql.connection
     cur = con.cursor()
     if type == 'Manager':
-        cur.execute('SELECT * FROM DatabaseManager DM WHERE DM.username = %s AND DM.password = %s', (username, hashed_pw))
-    if type == 'User': 
+        cur.execute('SELECT COUNT(1) FROM DatabaseManager DM WHERE DM.username = %s AND DM.password = %s', (username, hashed_pw))
+        rc = int(cur.fetchone()[0]) # return code
+        con.commit()
+        if rc: return render_template('manager.html', username=username)
+        return render_template('login_error.html')
+    elif type == 'User': 
         cur.execute('SELECT COUNT(1) FROM User U WHERE U.username = %s AND U.password = %s', (username, hashed_pw))
-    rc = int(cur.fetchone()[0]) # return code
-    if rc: 
-        return render_template('user.html', username=username)
+        rc = int(cur.fetchone()[0]) # return code
+        con.commit()
+        if rc: return render_template('user.html', username=username)
+        return render_template('login_error.html')
     else: return render_template('login_error.html')
 
 
@@ -44,6 +49,22 @@ def add_user():
             VALUES (%s, %s, %s)", params)
         mysql.connection.commit()
         return render_template('manager.html', added_user=True)
+
+@app.route('/deletedrugs', methods = ['GET', 'POST'])
+def delete_drug():
+    # TODO: Add a check for whether the user is already registered or not
+    if request.method == 'GET':
+        return render_template('deletedrugs.html')
+    elif request.method == 'POST':
+        drugbank_id = request.form['drugid']
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM Drug WHERE drugbank_id = %s", (drugbank_id,))
+        cur.execute("SELECT ROW_COUNT()")
+        rc = int(cur.fetchone()[0])
+        mysql.connection.commit()
+        if rc:
+            return render_template('deletedrugs.html', success=True)
+        else: return render_template('deletedrugs.html', success=False)
 
 
 if __name__ == "__main__":
