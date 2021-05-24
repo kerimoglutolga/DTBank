@@ -1,5 +1,5 @@
 from flask import Flask, request, render_template, url_for
-import sqlite3
+from flask_mysqldb import MySQL
 
 app = Flask(__name__)
 
@@ -14,23 +14,10 @@ def login():
     password = request.form['Password']
     type = request.form['Type']
 
-    con = sqlite3.connect('DTBank.db')
-    cur = con.cursor()
-
-    if type == 'User':
-        cur.execute('SELECT EXISTS(SELECT 1 FROM User WHERE username=? \
-            AND password = ?)', (username, password))
-        rc = int(cur.fetchone()[0])
-        if rc:
-            return render_template('user.html', username=username)
-        else: return render_template('login_error.html')
-    elif type == 'Manager':
-        cur.execute('SELECT EXISTS(SELECT 1 FROM DatabaseManager WHERE username=? \
-            AND password = ?)', (username, password))
-        rc = int(cur.fetchone()[0])
-        if rc:
-            return render_template('manager.html', username=username)
-        else: return render_template('login_error.html')
+    app.config['MYSQL_HOST'] = 'localhost'
+    app.config['MYSQL_USER'] = 'root'
+    app.config['MYSQL_PASSWORD'] = 'group4'
+    app.config['MYSQL_DB'] = 'dtbank'
 
 @app.route('/adduser', methods = ['GET', 'POST'])
 def add_user():
