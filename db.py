@@ -10,12 +10,12 @@ cur = con.cursor()
 """cur.execute("CREATE TABLE User( \
     username VARCHAR(30), \
     institute VARCHAR(100), \
-    password VARCHAR(30), \
+    password CHAR(64), \
     PRIMARY KEY(username,institute))")"""
 
 """cur.execute("CREATE TABLE DatabaseManager(\
     username VARCHAR(30), \
-    password VARCHAR(30), \
+    password VARCHAR(64), \
     PRIMARY KEY(username))")"""
 
 """cur.execute("CREATE TABLE UniProt( \

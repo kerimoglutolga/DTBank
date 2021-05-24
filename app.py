@@ -1,8 +1,13 @@
 from flask import Flask, request, render_template, url_for
 from flask_mysqldb import MySQL
+import hashlib
 
 app = Flask(__name__)
-
+app.config['MYSQL_HOST'] = 'localhost'
+app.config['MYSQL_USER'] = 'root'
+app.config['MYSQL_PASSWORD'] = 'group4'
+app.config['MYSQL_DB'] = 'dtbank'
+mysql = MySQL(app)
 
 @app.route('/')
 def index():
@@ -11,39 +16,35 @@ def index():
 @app.route('/', methods = ['POST'])
 def login():
     username = request.form['Username']
-    password = request.form['Password']
+    hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
     type = request.form['Type']
+    con = mysql.connection
+    cur = con.cursor()
+    if type == 'Manager':
+        cur.execute('SELECT * FROM DatabaseManager DM WHERE DM.username = %s AND DM.password = %s', (username, hashed_pw))
+    if type == 'User': 
+        cur.execute('SELECT COUNT(1) FROM User U WHERE U.username = %s AND U.password = %s', (username, hashed_pw))
+    rc = int(cur.fetchone()[0]) # return code
+    if rc: 
+        return render_template('user.html', username=username)
+    else: return render_template('login_error.html')
 
-    app.config['MYSQL_HOST'] = 'localhost'
-    app.config['MYSQL_USER'] = 'root'
-    app.config['MYSQL_PASSWORD'] = 'group4'
-    app.config['MYSQL_DB'] = 'dtbank'
 
 @app.route('/adduser', methods = ['GET', 'POST'])
 def add_user():
+    # TODO: Add a check for whether the user is already registered or not
     if request.method == 'GET':
         return render_template('adduser.html')
     else:
-        username = request.form['Username']
-        password = request.form['Password']
-        institute = request.form['Institute']
+        hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
+        params =  (request.form['Username'], hashed_pw, request.form['Institute'])
+        print(params)
+        cur = mysql.connection.cursor()
+        cur.execute("INSERT INTO User(username, password, institute) \
+            VALUES (%s, %s, %s)", params)
+        mysql.connection.commit()
         return render_template('manager.html', added_user=True)
 
-
-@app.route('/user')
-def logged_in():
-    return render_template('user.html', username="Tolga")
-
-@app.route('/drugs')
-def drugs():
-    con = sqlite3.connect('DTBank.db')
-    cur = con.cursor()
-    cur.execute("SELECT D.name, D.drugbank_id, DC.smiles, D.description, B.target_name, group_concat(S.name) \
-        FROM Drug D, DrugCausedSideEffect DS, SideEffectName S, DrugChemicalNotations DC, Bindings B \
-        WHERE D.drugbank_id = B.drugbank_id AND D.drugbank_id = DC.drugbank_id AND D.drugbank_id = DS.drugbank_id \
-        GROUP BY D.name, D.drugbank_id, DC.smiles, D.description, B.target_name")
-    rows = cur.fetchall()
-    return render_template('drugs.html', rows=rows)
 
 if __name__ == "__main__":
     app.run(debug=True)
