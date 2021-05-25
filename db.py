@@ -32,9 +32,10 @@ cur.execute("CREATE TABLE Drug( \
     UNIQUE(name), \
     UNIQUE(smiles))")
 
+# drugbank_id type ı farklı
 cur.execute("CREATE TABLE Interacts ( \
-    interactor_id VARCHAR(30), \
-    interactee_id VARCHAR(30), \
+    interactor_id CHAR(7), \
+    interactee_id CHAR(7), \
     PRIMARY KEY(interactor_id,interactee_id), \
     FOREIGN KEY (interactor_id) REFERENCES Drug(drugbank_id) ON DELETE CASCADE ON UPDATE CASCADE, \
     FOREIGN KEY (interactee_id) REFERENCES Drug(drugbank_id) ON DELETE CASCADE ON UPDATE CASCADE)")
