@@ -16,7 +16,8 @@ def index():
 @app.route('/', methods = ['POST'])
 def login():
     username = request.form['Username']
-    hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
+    #hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
+    hashed_pw=request.form['Password']
     type = request.form['Type']
     con = mysql.connection
     cur = con.cursor()
@@ -65,6 +66,23 @@ def delete_drug():
         if rc:
             return render_template('deletedrugs.html', success=True)
         else: return render_template('deletedrugs.html', success=False)
+
+@app.route('/drugs',methods=['GET'])
+def drugs():
+    return render_template('drugsOptions.html')
+
+@app.route('/drugs/<subpath>',methods=['GET','POST'])
+def drugsSubpaths(subpath):
+    if subpath=='viewDrugs':
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT * FROM Drug D,(SELECT drugbank_id,target_name FROM Bindings) T,DrugCausedSideEffect S \
+            WHERE D.drugbank_id=S.drugbank_id \
+            AND D.drugbank_id=T.drugbank_id")
+        table=cur.fetchall()
+
+        # Html daha olmadı
+        return render_template('viewDrugs.html',table=table)
+
 
 
 if __name__ == "__main__":

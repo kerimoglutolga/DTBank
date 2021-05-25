@@ -32,7 +32,7 @@ cur.execute("CREATE TABLE Drug( \
     UNIQUE(name), \
     UNIQUE(smiles))")
 
-# drugbank_id type ı farklı
+
 cur.execute("CREATE TABLE Interacts ( \
     interactor_id CHAR(7), \
     interactee_id CHAR(7), \
@@ -82,13 +82,13 @@ cur.execute("CREATE TABLE Points( \
 
 
 # To do 1: Add the triggers
-cur.execute(
+"""cur.execute(
     "create trigger deletedrug after delete on Drug for each row \n " \
     "begin \n" \
     "delete from Interacts where interactee_id=OLD.drugbank_id; \n "\
     "delete from Bindings B where B.drugbank_id=OLD.drugbank_id; \n" \
     "delete from DrugCausedSideEffect S where S.drugbank_id=OLD.drugbank_id; \n "\
-    "end \n " )
+    "end \n " )"""
 
 """cur.execute("delimiter // \
     create trigger deleteprotein after delete on UniProt for each row \
@@ -131,4 +131,7 @@ cur.execute("delimiter // \
 """
 
 # TODO: Trigger to add institute after adding new user
-
+"""cur.execute("create trigger insertPoint after insert on User for each row \n " \
+    "begin \n" \
+    "insert into Points values (NEW.institute,0); \n "\
+    "end \n ")"""
