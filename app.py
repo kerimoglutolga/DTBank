@@ -16,8 +16,7 @@ def index():
 @app.route('/', methods = ['POST'])
 def login():
     username = request.form['Username']
-    #hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
-    hashed_pw=request.form['Password']
+    hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
     type = request.form['Type']
     con = mysql.connection
     cur = con.cursor()
