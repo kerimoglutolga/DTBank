@@ -53,7 +53,6 @@ cur.execute("CREATE TABLE DrugCausedSideEffect( \
     FOREIGN KEY (umls_cui) REFERENCES SideEffectName(umls_cui) ON DELETE CASCADE ON UPDATE CASCADE)")
 
 
-
 cur.execute("CREATE TABLE Bindings( \
     reaction_id INTEGER, \
     measure VARCHAR(4), \
@@ -61,13 +60,11 @@ cur.execute("CREATE TABLE Bindings( \
     doi VARCHAR(50), \
     drugbank_id CHAR(7), \
     uniprot_id CHAR(6), \
-    username VARCHAR(30), \
-    institute VARCHAR(100), \
     target_name VARCHAR(100), \
+    institute VARCHAR(100), \
     PRIMARY KEY(reaction_id), \
     FOREIGN KEY (drugbank_id) REFERENCES Drug(drugbank_id) ON DELETE CASCADE ON UPDATE CASCADE, \
-    FOREIGN KEY (uniprot_id) REFERENCES UniProt(uniprot_id) ON DELETE CASCADE ON UPDATE CASCADE, \
-    FOREIGN KEY (username,institute) REFERENCES User(username, institute) ON DELETE CASCADE ON UPDATE CASCADE)")
+    FOREIGN KEY (uniprot_id) REFERENCES UniProt(uniprot_id) ON DELETE CASCADE ON UPDATE CASCADE")
 
 cur.execute("CREATE TABLE Contributors( \
     reaction_id INTEGER, \
@@ -85,44 +82,51 @@ cur.execute("CREATE TABLE Points( \
 
 # To do 1: Add the triggers
 cur.execute("delimiter // \
-create trigger deletedrug after delete on Drug for each row \
-begin \
-delete from Interacts where interactee_id=OLD.drugbank_id; \
-delete from Bindings B where B.drugbank_id=OLD.drugbank_id; \
-delete from DrugCausedSideEffect S where S.drugbank_id=OLD.drugbank_id; \
-end// \
-delimiter ;")
+    create trigger deletedrug after delete on Drug for each row \
+    begin \
+    delete from Interacts where interactee_id=OLD.drugbank_id; \
+    delete from Bindings B where B.drugbank_id=OLD.drugbank_id; \
+    delete from DrugCausedSideEffect S where S.drugbank_id=OLD.drugbank_id; \
+    end// \
+    delimiter ;")
 
 cur.execute("delimiter // \
-create trigger deleteprotein after delete on UniProt for each row \
-begin \
-delete from Bindings B where B.uniprot_id=OLD.uniprot_id; \
-end// \
-delimiter ;")
+    create trigger deleteprotein after delete on UniProt for each row \
+    begin \
+    delete from Bindings B where B.uniprot_id=OLD.uniprot_id; \
+    end// \
+    delimiter ;")
 
 cur.execute("delimiter // \
-create trigger updatePoints2 after insert on Contributors for each row \
-begin \
-update Points P set P.score=P.score+2 where P.institute=NEW.institute; \
-end// \
-delimiter ;")
+    create trigger addPoints2 after insert on Contributors for each row \
+    begin \
+    update Points P set P.score=P.score+2 where P.institute=NEW.institute; \
+    end// \
+    delimiter ;")
 
 cur.execute("delimiter // \
-create trigger updatePoints5 after insert on Bindings for each row \
-begin \
-(select institute from Contributors C where C.reaction_id=NEW.reaction_id group by institute) as temp \
-update Points P set P.score=P.score+5 where P.institute in temp; \
-end \
-delimiter ;")
+    create trigger deletePoints2 after delete on Contributors for each row \
+    begin \
+    update Points P set P.score=P.score-2 where P.institute=OLD.institute; \
+    end// \
+    delimiter ;")
+
+cur.execute("delimiter // \
+    create trigger addPoints5 after insert on Bindings for each row \
+    begin \
+    update Points P set P.score=P.score+5 where P.institute=NEW.institute; \
+    end// \
+    delimiter ;")
+
 # To do 2: Enforce the constraint that the DatabaseManager table can have at most 5 entries
 cur.execute("delimiter // \
-create trigger limitDatabaseManager after insert on DatabaseManager for each row \
-begin \
-if (select count(*) from DatabaseManager)>5 then begin \
-delete from DatabaseManager D where D.username=NEW.username; \
-end; \
-end if; \
-end// \
-delimiter ;")
+    create trigger limitDatabaseManager after insert on DatabaseManager for each row \
+    begin \
+    if (select count(*) from DatabaseManager)>5 then begin \
+    delete from DatabaseManager D where D.username=NEW.username; \
+    end; \
+    end if; \
+    end// \
+    delimiter ;")
 
 
