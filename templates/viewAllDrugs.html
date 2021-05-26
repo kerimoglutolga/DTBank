@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    
+    td {
+        text-align: center; 
+        vertical-align: middle;
+    }
+</style>
+
+<center><h1>View all drugs</h1></center>
+{% endblock %}
+
+
+{% block body %}
+<center>
+<table>
+    
+    <tr>
+      <th>Drugbank ID</th>
+      <th>Drug name</th> 
+      <th>Smiles</th>
+      <th>Description</th>
+      <th>Target name</th>
+      <th>Side effect name</th>
+    </tr>
+    
+    {% for row in table %}
+          <tr>
+            {% for i in row %}
+            <td>{{i}}</td>
+            {% endfor %}
+          </tr>
+    {% endfor %}
+</table>
+</center>
+{% endblock %}

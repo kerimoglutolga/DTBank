@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    
+    td {
+        text-align: center; 
+        vertical-align: middle;
+    }
+</style>
+{% if table[0]=='interactions' %}
+<center><h1>View Drug Interactions of {{table[2]}}</h1></center>
+{% endif %} 
+
+{% if table[0]=='side effects' %} 
+<center><h1>View Drug Side Effects of {{table[2]}}</h1></center>
+{% endif %} 
+
+{% if table[0]=='targets' %} 
+<center><h1>View Drug Targets of {{table[2]}}</h1></center>
+{% endif %} 
+
+{% endblock %}
+
+
+{% block body %}
+<center>
+<table>
+
+{% if table[0]=='interactions' %} 
+    <tr>
+        <th>Drugbank ID</th>
+        <th>Drug name</th> 
+    </tr>  
+{% endif %} 
+
+{% if table[0]=='side effects' %} 
+    <tr>
+        <th>Side effect name</th>
+        <th>UMLS CUI</th> 
+    </tr>  
+{% endif %} 
+
+{% if table[0]=='targets' %} 
+    <tr>
+        <th>UniProt ID</th>
+        <th>Target name</th> 
+    </tr>  
+{% endif %} 
+
+{% for row in table[1] %}
+          <tr>
+            {% for i in row %}
+            <td>{{i}}</td>
+            {% endfor %}
+          </tr>
+    {% endfor %}
+</table>
+</center>
+{% endblock %}
+    
