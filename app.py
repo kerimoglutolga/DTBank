@@ -81,9 +81,7 @@ def drugsSubpaths():
     FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
     WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui")
     table=cur.fetchall()
-    return render_template('viewAllDrugs.html',table=table)
-
-
+    return render_template('viewAll.html',table=table)
 
 @app.route('/drugs/viewOtherOptionsDrugs',methods=['POST'])
 def viewDrugInteractionResults():
@@ -94,21 +92,44 @@ def viewDrugInteractionResults():
         cur.execute("SELECT I.interactee_id,D.name FROM Interacts I, Drug D WHERE I.interactor_id=%s AND \
             I.interactee_id=D.drugbank_id",request.form['drugbank_id'])
         table=(request.form['Type'], cur.fetchall(),request.form['drugbank_id'])
-        return render_template('viewSearchedDrug.html',table=table)
+        return render_template('viewSearched.html',table=table)
 
     elif request.form['Type']=='side effects':
         cur = mysql.connection.cursor()
         cur.execute("SELECT N.name,S.umls_cui FROM DrugCausedSideEffect S, SideEffectName N WHERE \
             S.drugbank_id=%s AND S.umls_cui=N.umls_cui",request.form['drugbank_id'])
         table=(request.form['Type'], cur.fetchall(),request.form['drugbank_id'])
-        return render_template('viewSearchedDrug.html',table=table)
+        return render_template('viewSearched.html',table=table)
     else:
         cur = mysql.connection.cursor()
         cur.execute("SELECT uniprot_id, target_name FROM Bindings WHERE drugbank_id=%s",request.form['drugbank_id'])
         table=(request.form['Type'], cur.fetchall(),request.form['drugbank_id'])
-        return render_template('viewSearchedDrug.html',table=table)
+        return render_template('viewSearched.html',table=table)
     
-    
+@app.route('/proteins',methods=['GET'])
+def proteinsOptions():
+    return render_template('proteins.html')
+
+@app.route('/proteins/drugsForSameProtein',methods=['GET'])
+def drugsForSameProtein():
+    cur = mysql.connection.cursor()
+    cur.execute("")
+    table=cur.fetchall()
+    return render_template('')
+
+@app.route('/proteins/proteinsForSameDrug',methods=['GET'])
+def drugsForSameProtein():
+    cur = mysql.connection.cursor()
+    cur.execute("")
+    table=cur.fetchall()
+    return render_template('')
+
+@app.route('/proteins/aProteinInteractedDrugs',methods=['POST'])
+def viewProteins():
+    cur = mysql.connection.cursor()
+    cur.execute("")
+    table=(, cur.fetchall(),request.form['uniprot_id'])
+    return render_template('',table=table)
 
 if __name__ == "__main__":
     app.run(debug=True)
