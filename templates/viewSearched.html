@@ -24,6 +24,11 @@
 <center><h1>View Drug Targets of {{table[2]}}</h1></center>
 {% endif %} 
 
+{% if table[0]=='aProteinInteractedDrugs' %} 
+<center><h1>View Drugs that Interact with the Protein {{table[2]}}</h1></center>
+{% endif %} 
+
+
 {% endblock %}
 
 
@@ -50,6 +55,13 @@
         <th>UniProt ID</th>
         <th>Target name</th> 
     </tr>  
+{% endif %} 
+ 
+{% if table[0]=='aProteinInteractedDrugs' %} 
+<tr>
+    <th>Drugbank ID</th>
+    <th>Drug name</th> 
+</tr>  
 {% endif %} 
 
 {% for row in table[1] %}

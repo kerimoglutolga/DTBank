@@ -13,14 +13,26 @@
     }
 </style>
 
-<center><h1>View all drugs</h1></center>
+{% if table[0]=='viewAllDrugs' %} 
+<center><h1>View All Drugs</h1></center>
+{% endif %}
+
+{% if table[0]=='proteinsForSameDrug' %} 
+<center><h1>View Proteins that Bind the Same Drug</h1></center>
+{% endif %} 
+
+{% if table[0]=='drugsForSameProtein' %} 
+<center><h1>View Drugs that Affect the Same Protein</h1></center>
+{% endif %} 
+
 {% endblock %}
 
 
 {% block body %}
 <center>
 <table>
-    
+
+  {% if table[0]=='viewAllDrugs' %} 
     <tr>
       <th>Drugbank ID</th>
       <th>Drug name</th> 
@@ -29,8 +41,23 @@
       <th>Target name</th>
       <th>Side effect name</th>
     </tr>
-    
-    {% for row in table %}
+    {% endif %} 
+
+    {% if table[0]=='drugsForSameProtein' %} 
+    <tr>
+        <th>UniProt ID</th>
+        <th>Drugbank IDs</th> 
+    </tr>  
+    {% endif %} 
+
+    {% if table[0]=='proteinsForSameDrug' %} 
+    <tr>
+        <th>Drugbank ID</th> 
+        <th>UniProt IDs</th>
+    </tr>  
+    {% endif %}
+
+    {% for row in table[1] %}
           <tr>
             {% for i in row %}
             <td>{{i}}</td>

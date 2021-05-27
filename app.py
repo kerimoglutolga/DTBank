@@ -5,7 +5,7 @@ import hashlib
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'group4'
+app.config['MYSQL_PASSWORD'] = 'Geronimo766846'
 app.config['MYSQL_DB'] = 'dtbank'
 mysql = MySQL(app)
 
@@ -80,7 +80,7 @@ def drugsSubpaths():
     cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, E.name \
     FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
     WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui")
-    table=cur.fetchall()
+    table=('viewAllDrugs',cur.fetchall())
     return render_template('viewAll.html',table=table)
 
 @app.route('/drugs/viewOtherOptionsDrugs',methods=['POST'])
@@ -113,23 +113,26 @@ def proteinsOptions():
 @app.route('/proteins/drugsForSameProtein',methods=['GET'])
 def drugsForSameProtein():
     cur = mysql.connection.cursor()
-    cur.execute("")
-    table=cur.fetchall()
-    return render_template('')
+    cur.execute("SELECT U.uniprot_id,GROUP_CONCAT(DISTINCT B.drugbank_id) FROM \
+        UniProt U LEFT JOIN Bindings B ON U.uniprot_id=B.uniprot_id GROUP BY U.uniprot_id")
+    table=('drugsForSameProtein', cur.fetchall())
+    return render_template('viewAll.html',tabke=table)
 
 @app.route('/proteins/proteinsForSameDrug',methods=['GET'])
 def drugsForSameProtein():
     cur = mysql.connection.cursor()
-    cur.execute("")
-    table=cur.fetchall()
-    return render_template('')
+    cur.execute("SELECT D.drugbank_id,GROUP_CONCAT(DISTINCT B.uniprot_id) FROM \
+    Drug D LEFT JOIN Bindings B ON B.drugbank_id=D.drugbank_id GROUP BY D.drugbank_id")
+    table=('proteinsForSameDrug',cur.fetchall())
+    return render_template('viewAll.html',table=table)
 
 @app.route('/proteins/aProteinInteractedDrugs',methods=['POST'])
 def viewProteins():
     cur = mysql.connection.cursor()
-    cur.execute("")
-    table=(, cur.fetchall(),request.form['uniprot_id'])
-    return render_template('',table=table)
+    cur.execute("SELECT D.drugbank_id,D.name FROM Bindings B,Drug D \
+        WHERE B.uniprot_id=%s AND D.drugbank_id=B.drugbank_id GROUP BY D.drugbank_id,D.name",request.form['uniprot_id'])
+    table=('aProteinInteractedDrugs', cur.fetchall(),request.form['uniprot_id'])
+    return render_template('viewSearched.html',table=table)
 
 if __name__ == "__main__":
     app.run(debug=True)
