@@ -70,12 +70,12 @@ def delete_drug():
 def drugOptions1():
     return render_template('drugOptions1.html')
 
-@app.route('/drugs/otherOptions',methods=['GET','POST'])
+@app.route('/drugs/otherOptions',methods=['GET'])
 def drugOptions2():
     return render_template('drugOptions2.html')
 
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
-def drugsSubpaths():
+def drugsViewAll():
     cur = mysql.connection.cursor()
     cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, E.name \
     FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
@@ -87,7 +87,6 @@ def drugsSubpaths():
 def viewDrugInteractionResults():
 
     if request.form['Type']=='interactions':
-        
         cur = mysql.connection.cursor()
         cur.execute("SELECT I.interactee_id,D.name FROM Interacts I, Drug D WHERE I.interactor_id=%s AND \
             I.interactee_id=D.drugbank_id",request.form['drugbank_id'])
@@ -110,16 +109,20 @@ def viewDrugInteractionResults():
 def proteinsOptions():
     return render_template('proteins.html')
 
+@app.route('/proteins/searchProtein',methods=['GET'])
+def searchProtein():
+    return render_template('searchProtein.html')
+
 @app.route('/proteins/drugsForSameProtein',methods=['GET'])
 def drugsForSameProtein():
     cur = mysql.connection.cursor()
     cur.execute("SELECT U.uniprot_id,GROUP_CONCAT(DISTINCT B.drugbank_id) FROM \
         UniProt U LEFT JOIN Bindings B ON U.uniprot_id=B.uniprot_id GROUP BY U.uniprot_id")
     table=('drugsForSameProtein', cur.fetchall())
-    return render_template('viewAll.html',tabke=table)
+    return render_template('viewAll.html',table=table)
 
 @app.route('/proteins/proteinsForSameDrug',methods=['GET'])
-def drugsForSameProtein():
+def proteinsForSameDrug():
     cur = mysql.connection.cursor()
     cur.execute("SELECT D.drugbank_id,GROUP_CONCAT(DISTINCT B.uniprot_id) FROM \
     Drug D LEFT JOIN Bindings B ON B.drugbank_id=D.drugbank_id GROUP BY D.drugbank_id")
@@ -127,7 +130,7 @@ def drugsForSameProtein():
     return render_template('viewAll.html',table=table)
 
 @app.route('/proteins/aProteinInteractedDrugs',methods=['POST'])
-def viewProteins():
+def aProteinInteractedDrugs():
     cur = mysql.connection.cursor()
     cur.execute("SELECT D.drugbank_id,D.name FROM Bindings B,Drug D \
         WHERE B.uniprot_id=%s AND D.drugbank_id=B.drugbank_id GROUP BY D.drugbank_id,D.name",request.form['uniprot_id'])

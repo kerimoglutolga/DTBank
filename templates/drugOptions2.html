@@ -8,7 +8,7 @@
 {% block body %}
 <br>
 <center>
-<form id='write_drug' action="/drugs/viewOtherOptionsDrugs" method='post'>
+<form id='search_drug' action="/drugs/viewOtherOptionsDrugs" method='post'>
     <input type="text" placeholder="Drugbank ID" name="drugbank_id" required>
     <br>
     <select id="Type" name="Type">
@@ -16,7 +16,7 @@
         <option value="side effects" name="side effects">View side effects of a drug</option>
         <option value="targets" name="targets">View targets of a drug</option>
       </select>
-      <button type='submit'>Login</button>
+      <button type='submit'>Search</button>
 </form>  
 
 </center>
