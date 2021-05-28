@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+
+{% endblock %}
+
+
+{% block body %}
+
+<center>
+    <h1>Delete Protein</h1>
+    {% if success is defined and success == True %} <h3>Protein Deleted Successfully!</h3> 
+    {% elif success is defined and success == False %} <h3>There is no protein with that id!</h3> 
+    {% endif %}
+    <form id='login-form' action="" method='post'>
+    <input type="text" placeholder="ID of the protein to delete" name="protid" required>
+    <button type='submit'>Delete Protein</button>
+    </form>
+</center>
+
+{% endblock %}

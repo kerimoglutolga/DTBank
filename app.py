@@ -54,7 +54,7 @@ def add_user():
 def delete_drug():
     # TODO: Add a check for whether the user is already registered or not
     if request.method == 'GET':
-        return render_template('deletedrugs.html')
+        return render_template('editdrugs.html', delete=True)
     elif request.method == 'POST':
         drugbank_id = request.form['drugid']
         cur = mysql.connection.cursor()
@@ -63,8 +63,41 @@ def delete_drug():
         rc = int(cur.fetchone()[0])
         mysql.connection.commit()
         if rc:
-            return render_template('deletedrugs.html', success=True)
-        else: return render_template('deletedrugs.html', success=False)
+            return render_template('editdrugs.html', delete=True, success=True)
+        else: return render_template('editdrugs.html', delete=True, success=False)
+
+@app.route('/affinity', methods = ['GET', 'POST'])
+def update_drug():
+    # TODO: Add a check for whether the user is already registered or not
+    if request.method == 'GET':
+        return render_template('editdrugs.html', affinity=True)
+    elif request.method == 'POST':
+        drugbank_id = request.form['drugid']
+        affinity = request.form['affinity']
+        cur = mysql.connection.cursor()
+        cur.execute("UPDATE Bindings SET affinity_nM = %s WHERE drugbank_id = %s", (affinity, drugbank_id))
+        cur.execute("SELECT ROW_COUNT()")
+        rc = int(cur.fetchone()[0])
+        mysql.connection.commit()
+        if rc:
+            return render_template('editdrugs.html', affinity=True, success=True)
+        else: return render_template('editdrugs.html', affinity=True, success=False)
+
+@app.route('/deleteprot', methods = ['GET', 'POST'])
+def delete_prot():
+    # TODO: Add a check for whether the user is already registered or not
+    if request.method == 'GET':
+        return render_template('prot.html')
+    elif request.method == 'POST':
+        uniprot_id = request.form['protid']
+        cur = mysql.connection.cursor()
+        cur.execute("DELETE FROM UniProt WHERE uniprot_id = %s", (uniprot_id,))
+        cur.execute("SELECT ROW_COUNT()")
+        rc = int(cur.fetchone()[0])
+        mysql.connection.commit()
+        if rc:
+            return render_template('prot.html', success=True)
+        else: return render_template('prot.html', success=False)
 
 @app.route('/drugs',methods=['GET'])
 def drugs():
