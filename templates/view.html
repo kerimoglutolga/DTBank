@@ -1,0 +1,79 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    
+    td {
+        text-align: center; 
+        vertical-align: middle;
+    }
+</style>
+{% endblock %}
+
+{% block body %}
+
+{% if user == True %} 
+    <center> <h1>Users</h1>  </center>
+    <center>
+    <table>
+        <tr>
+        <th>Username</th>
+        <th>Institute</th>
+        </tr>
+        {% for row in table %}
+            <tr>
+                {% for i in row %}
+                <td>{{i}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </center>
+{% endif %}
+
+{% if prot == True %} 
+    <center> <h1>Proteins</h1> </center>
+    <center>
+    <table>
+        <tr>
+        <th>Protein ID</th>
+        <th>Sequence</th>
+        </tr>
+        {% for row in table %}
+            <tr>
+                {% for i in row %}
+                <td>{{i}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </center>
+{% endif %}
+
+{% if sider == True %} 
+    <center> <h1>Side Effects</h1> </center>
+    <center>
+    <table>
+        <tr>
+        <th>Umls Cui</th>
+        <th>Name</th>
+        <th>Caused By</th>
+        </tr>
+        {% for row in table %}
+            <tr>
+                {% for i in row %}
+                <td>{{i}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </center>
+{% endif %}
+
+{% endblock %}
+
+

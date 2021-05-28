@@ -2,6 +2,8 @@ from flask import Flask, request, render_template, url_for
 from flask_mysqldb import MySQL
 import hashlib
 
+from werkzeug.wrappers import response
+
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
@@ -125,6 +127,26 @@ def contrib():
         if rc:
             return render_template('updatecontrib.html', success=True)
         else: return render_template('updatecontrib.html', success=False)
+
+@app.route('/browse')
+def browse():
+    return render_template('browse.html')
+
+@app.route('/browse/<string:subpath>')
+def browse_db(subpath):
+    cur = mysql.connection.cursor()
+    if subpath == 'users':
+        cur.execute('SELECT username, institute FROM User')
+        return render_template('view.html', user=True, table=cur.fetchall())
+    if subpath == 'proteins':
+        cur.execute('SELECT * FROM UniProt')
+        return render_template('view.html', prot=True, table=cur.fetchall())
+    if subpath == 'sider':
+        cur.execute('SELECT S.umls_cui, S.name, group_concat(DS.drugbank_id) FROM SideEffectName S, DrugCausedSideEffect DS \
+            WHERE S.umls_cui = DS.umls_cui \
+            GROUP BY S.umls_cui, S.name')
+        return render_template('view.html', sider=True, table=cur.fetchall())
+        
 
 @app.route('/drugs',methods=['GET'])
 def drugOptions1():
