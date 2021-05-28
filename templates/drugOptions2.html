@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<center><h1>Type the id of the drug and then choose one of the options</h1></center>
+{% endblock %}
+
+
+{% block body %}
+<br>
+<center>
+<form id='search_drug' action="/drugs/viewOtherOptionsDrugs" method='post'>
+    <input type="text" placeholder="Drugbank ID" name="drugbank_id" required>
+    <br>
+    <select id="Type" name="Type">
+        <option value="interactions" name="interactions">View interactions of a drug</option>
+        <option value="side effects" name="side effects">View side effects of a drug</option>
+        <option value="targets" name="targets">View targets of a drug</option>
+      </select>
+      <button type='submit'>Search</button>
+</form>  
+
+</center>
+{% endblock %}
