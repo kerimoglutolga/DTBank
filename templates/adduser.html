@@ -9,6 +9,7 @@
 {% block body %}
 <center>
     <h1>Welcome to DTBank!</h1>
+    {% if error == True %} <h3 style="color: red">A user with the given username and institute already exists.</h3> {% endif %}
     <form id='login-form' action="" method='post'>
       <input type="text" placeholder="Username" name="Username" required>
       <input type="text" placeholder="Institute" name="Institute" required>

@@ -5,7 +5,7 @@ import hashlib
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Geronimo766846'
+app.config['MYSQL_PASSWORD'] = 'group4'
 app.config['MYSQL_DB'] = 'dtbank'
 mysql = MySQL(app)
 
@@ -45,9 +45,11 @@ def add_user():
         params =  (request.form['Username'], hashed_pw, request.form['Institute'])
         print(params)
         cur = mysql.connection.cursor()
-        cur.execute("INSERT INTO User(username, password, institute) \
+        try:
+            cur.execute("INSERT INTO User(username, password, institute) \
             VALUES (%s, %s, %s)", params)
-        mysql.connection.commit()
+        except mysql.connection.Error as err:
+            return render_template('adduser.html', error=True)
         return render_template('manager.html', added_user=True)
 
 @app.route('/deletedrugs', methods = ['GET', 'POST'])
@@ -85,7 +87,6 @@ def update_drug():
 
 @app.route('/deleteprot', methods = ['GET', 'POST'])
 def delete_prot():
-    # TODO: Add a check for whether the user is already registered or not
     if request.method == 'GET':
         return render_template('prot.html')
     elif request.method == 'POST':
@@ -98,6 +99,32 @@ def delete_prot():
         if rc:
             return render_template('prot.html', success=True)
         else: return render_template('prot.html', success=False)
+
+@app.route('/updatecontrib', methods = ['GET', 'POST'])
+def contrib():
+    if request.method == 'GET':
+        return render_template('updatecontrib.html')
+    elif request.method == 'POST':
+        reaction_id = request.form['reactionid']
+        username = request.form['contrib']
+        institute = request.form['institute']
+        cur = mysql.connection.cursor()
+        rc = 1
+        if 'delete' in request.form:
+            cur.execute("DELETE FROM Contributors \
+                WHERE reaction_id = %s AND username = %s AND institute = %s", (reaction_id, username, institute))
+            cur.execute("SELECT ROW_COUNT()")
+            rc = int(cur.fetchone()[0])
+        if 'add' in request.form:
+            try:
+                cur.execute("INSERT INTO Contributors (reaction_id, username, institute) \
+                VALUES (%s, %s, %s)", (reaction_id, username, institute))
+            except mysql.connection.Error as err:
+                rc = 0       
+        mysql.connection.commit()
+        if rc:
+            return render_template('updatecontrib.html', success=True)
+        else: return render_template('updatecontrib.html', success=False)
 
 @app.route('/drugs',methods=['GET'])
 def drugOptions1():
