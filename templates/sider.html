@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    
+    td {
+        text-align: center; 
+        vertical-align: middle;
+    }
+</style>
+<center><h1>Choose options</h1></center>
+{% endblock %}
+
+{% block body %}
+<center>
+    <p>Type UMLS CUI to view drugs with that side effect or</p>
+    <p>type UniProt ID to view the drug(s) that interact with that protein have least amount of side effects</p>
+    <form id='find_sider' action="/sider" method='post'>
+        <input type="text" placeholder="UMLS CUI or UniProt ID" name="keyword" required>
+        <br><br>
+        <select id="Type" name="Type">
+        <option value="drugsWithSameSider" name="drugsWithSameSider">View drugs that have a specific side effect</option>
+        <option value="drugLeastSider" name="drugLeastSider">View the drug(s) with the least amount of side effects that interact with a specific protein</option>
+        </select>
+        <br><br>
+        <button type='submit'>Search</button>
+    </form>   
+</center>
+{% endblock %}

@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block head %}
+
+{% if keyword=='searchProtein' %} 
+<center><h1>Type the id of the protein to find the interacting drugs</h1></center>
+{% endif %} 
+
+{% if keyword=='searchKeywordInDescription' %} 
+<center><h1>Type a keyword that can be found in drug descriptions</h1></center>
+{% endif %}
+
+{% endblock %}
+
+
+{% block body %}
+<br>
+{% if keyword=='searchProtein' %} 
+<center>
+    <form id='find_drug' action="/proteins/aProteinInteractedDrugs" method='post'>
+        <input type="text" placeholder="UniProt ID" name="uniprot_id" required>
+        <button type='submit'>Search</button>
+    </form>  
+</center>
+{% endif %}
+
+{% if keyword=='searchKeywordInDescription' %} 
+<center>
+    <form id='search_keyword' action="/drugs/searchKeywordInDescription" method='post'>
+        <input type="text" placeholder="Keyword" name="keyword" required>
+        <button type='submit'>Search</button>
+    </form>   
+</center>
+{% endif %}
+{% endblock %}

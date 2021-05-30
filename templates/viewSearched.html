@@ -13,21 +13,32 @@
     }
 </style>
 {% if table[0]=='interactions' %}
-<center><h1>View Drug Interactions of {{table[2]}}</h1></center>
+<center><h1>View Drug Interactions of '{{table[2]}}'</h1></center>
 {% endif %} 
 
 {% if table[0]=='side effects' %} 
-<center><h1>View Drug Side Effects of {{table[2]}}</h1></center>
+<center><h1>View Drug Side Effects of '{{table[2]}}'</h1></center>
 {% endif %} 
 
 {% if table[0]=='targets' %} 
-<center><h1>View Drug Targets of {{table[2]}}</h1></center>
+<center><h1>View Drug Targets of '{{table[2]}}'</h1></center>
 {% endif %} 
 
 {% if table[0]=='aProteinInteractedDrugs' %} 
-<center><h1>View Drugs that Interact with the Protein {{table[2]}}</h1></center>
+<center><h1>View Drugs that Interact with the Protein '{{table[2]}}'</h1></center>
 {% endif %} 
 
+{% if table[0]=='aSiderForDrugs' %} 
+<center><h1>View Drugs that have the Same Side Effect '{{table[2]}}'</h1></center>
+{% endif %} 
+
+{% if table[0]=='searchKeywordInDescription' %} 
+<center><h1>View Drugs that have the keyword '{{table[2]}}' in their descriptions</h1></center>
+{% endif %} 
+
+{% if table[0]=='drugLeastSider' %} 
+<center><h1>View the Drug(s) with the Least Smount of Side Effects that Interact with the Protein '{{table[2]}}'</h1></center>
+{% endif %} 
 
 {% endblock %}
 
@@ -58,6 +69,27 @@
 {% endif %} 
  
 {% if table[0]=='aProteinInteractedDrugs' %} 
+<tr>
+    <th>Drugbank ID</th>
+    <th>Drug name</th> 
+</tr>  
+{% endif %} 
+
+{% if table[0]=='aSiderForDrugs' %} 
+<tr>
+    <th>Drugbank ID</th>
+    <th>Drug name</th> 
+</tr>  
+{% endif %} 
+
+{% if table[0]=='searchKeywordInDescription' %} 
+<tr>
+    <th>Drugbank ID</th>
+    <th>Drug description</th> 
+</tr>  
+{% endif %} 
+
+{% if table[0]=='drugLeastSider' %} 
 <tr>
     <th>Drugbank ID</th>
     <th>Drug name</th> 

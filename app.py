@@ -7,7 +7,7 @@ from werkzeug.wrappers import response
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'group4'
+app.config['MYSQL_PASSWORD'] = 'Geronimo766846'
 app.config['MYSQL_DB'] = 'dtbank'
 mysql = MySQL(app)
 
@@ -161,7 +161,6 @@ def browse_db(subpath):
             FROM Interacts I')
         return render_template('view.html', interact=True, table=cur.fetchall())
 
-        
 
 @app.route('/drugs',methods=['GET'])
 def drugOptions1():
@@ -170,6 +169,18 @@ def drugOptions1():
 @app.route('/drugs/otherOptions',methods=['GET'])
 def drugOptions2():
     return render_template('drugOptions2.html')
+
+@app.route('/drugs/searchKeywordInDescription',methods=['GET','POST'])
+def searchKeywordInDescription():
+    if request.method=='GET':
+        keyword='searchKeywordInDescription'
+        return render_template('search.html',keyword=keyword)
+    else:
+        cur = mysql.connection.cursor()
+        cur.execute("SELECT drugbank_id,description FROM Drug WHERE description LIKE \'%{}%\'".format(request.form["keyword"]))
+        table=('searchKeywordInDescription',cur.fetchall(),request.form["keyword"])
+        return render_template('viewSearched.html',table=table)
+
 
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
 def drugsViewAll():
@@ -208,7 +219,8 @@ def proteinsOptions():
 
 @app.route('/proteins/searchProtein',methods=['GET'])
 def searchProtein():
-    return render_template('searchProtein.html')
+    keyword='searchProtein'
+    return render_template('search.html',keyword=keyword)
 
 @app.route('/proteins/drugsForSameProtein',methods=['GET'])
 def drugsForSameProtein():
@@ -233,6 +245,32 @@ def aProteinInteractedDrugs():
         WHERE B.uniprot_id=%s AND D.drugbank_id=B.drugbank_id GROUP BY D.drugbank_id,D.name",request.form['uniprot_id'])
     table=('aProteinInteractedDrugs', cur.fetchall(),request.form['uniprot_id'])
     return render_template('viewSearched.html',table=table)
+
+@app.route('/sider',methods=['GET','POST'])
+def sider():
+    if request.method=='GET':
+        return render_template("sider.html")
+    else:
+        if request.form["Type"]=='drugsWithSameSider':
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT D.drugbank_id, D.name FROM DrugCausedSideEffect S, Drug D \
+            WHERE D.drugbank_id=S.drugbank_id AND S.umls_cui=%s",request.form["keyword"])
+            table=('aSiderForDrugs',cur.fetchall(),request.form["keyword"])
+            return render_template('viewSearched.html',table=table)
+        else:
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT D.drugbank_id, D.name FROM \
+            (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
+            (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
+            WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id=%s  \
+            GROUP BY B.drugbank_id) AS T, Drug D \
+            WHERE T.drugbank_id=D.drugbank_id AND T.number=(SELECT min(T.number) FROM \
+            (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
+            (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
+            WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='u' \
+            GROUP BY B.drugbank_id) AS T)",request.form["keyword"])
+            table=('drugLeastSider',cur.fetchall(),request.form["keyword"])
+            return render_template('viewSearched.html',table=table)
 
 if __name__ == "__main__":
     app.run(debug=True)
