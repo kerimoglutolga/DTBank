@@ -146,6 +146,21 @@ def browse_db(subpath):
             WHERE S.umls_cui = DS.umls_cui \
             GROUP BY S.umls_cui, S.name')
         return render_template('view.html', sider=True, table=cur.fetchall())
+    if subpath == 'papers':
+        cur.execute('SELECT B.doi, group_concat(C.username)\
+            FROM Bindings B, Contributors C \
+            WHERE B.reaction_id = C.reaction_id \
+            GROUP B.doi')
+        return render_template('view.html', papers=True, table=cur.fetchall())
+    if subpath == 'drugs':
+        cur.execute('SELECT D.drugbank_id, D.name, D.description\
+            FROM Drug D')
+        return render_template('view.html', drugs=True, table=cur.fetchall())
+    if subpath == 'drugtarget':
+        cur.execute('SELECT I.interactor_id, group_concat(I.interactee_id)\
+            FROM Interacts I')
+        return render_template('view.html', interact=True, table=cur.fetchall())
+
         
 
 @app.route('/drugs',methods=['GET'])

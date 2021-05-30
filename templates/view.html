@@ -74,6 +74,65 @@
     </center>
 {% endif %}
 
+{% if papers == True %} 
+    <center> <h1>Papers</h1> </center>
+    <center>
+    <table>
+        <tr>
+        <th>Paper Link</th>
+        <th>Contributors</th>
+        </tr>
+        {% for row in table %}
+            <tr>
+                {% for i in row %}
+                <td>{{i}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </center>
+{% endif %}
+
+
+{% if drugs == True %} 
+    <center> <h1>Drugs</h1> </center>
+    <center>
+    <table>
+        <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Description</th>
+        </tr>
+        {% for row in table %}
+            <tr>
+                {% for i in row %}
+                <td>{{i}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </center>
+{% endif %}
+
+{% if interact == True %} 
+    <center> <h1>Interactions</h1> </center>
+    <center>
+    <table>
+        <tr>
+        <th>Drug ID</th>
+        <th>Interacts With</th>
+        </tr>
+        {% for row in table %}
+            <tr>
+                {% for i in row %}
+                <td>{{i}}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
+    </center>
+{% endif %}
+
 {% endblock %}
 
 
