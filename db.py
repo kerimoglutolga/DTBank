@@ -4,7 +4,7 @@ import MySQLdb
  # Enter your password and database name for the last two parameters, respectively
 
 
-con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
+con = MySQLdb.connect('localhost', 'root', 'Geronimo766846','dtbank')
 cur = con.cursor()
 # Following code creates the refined tables
 """cur.execute("CREATE TABLE User( \
@@ -134,4 +134,10 @@ cur.execute("delimiter // \
 """cur.execute("create trigger insertPoint after insert on User for each row \n " \
     "begin \n" \
     "insert into Points values (NEW.institute,0); \n "\
+    "end \n ")"""
+
+# stored procedure, sql'de delimiterla yapılıyo
+"""cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
+    "begin \n" \
+    "SELECT uniprot_id,target_name FROM Bindings WHERE drugbank_id=Drugid AND measure=Measurement AND affinity_nM<=MaxVal AND affinity_nM>=Minval;\n" \
     "end \n ")"""

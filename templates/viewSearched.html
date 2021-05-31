@@ -40,6 +40,11 @@
 <center><h1>View the Drug(s) with the Least Smount of Side Effects that Interact with the Protein '{{table[2]}}'</h1></center>
 {% endif %} 
 
+{% if table[0]=='filterTargets' %} 
+<center><h1>View the filtered targets that interact with the drug '{{table[2]}}' according to the given parameters</h1>
+<h2>Measurement type: {{table[3]}} Min affinity: {{table[4]}} Max affinity: {{table[5]}}</h2></center>
+{% endif %} 
+
 {% endblock %}
 
 
@@ -95,6 +100,13 @@
     <th>Drug name</th> 
 </tr>  
 {% endif %} 
+
+{% if table[0]=='filterTargets' %} 
+<tr>
+    <th>UniProt ID</th>
+    <th>Target name</th> 
+</tr>  
+{% endif %}
 
 {% for row in table[1] %}
           <tr>

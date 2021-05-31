@@ -181,6 +181,15 @@ def searchKeywordInDescription():
         table=('searchKeywordInDescription',cur.fetchall(),request.form["keyword"])
         return render_template('viewSearched.html',table=table)
 
+@app.route('/drugs/filterTargets',methods=['GET','POST'])
+def filterTargets():
+    if request.method=='GET':
+        return render_template('filterTargets.html')
+    else:
+        cur = mysql.connection.cursor()
+        cur.execute("CALL filterTargets('{}','{}',{},{})".format(request.form["drugbank_id"],request.form["measurement"],request.form["min"],request.form["max"]))
+        table=('filterTargets',cur.fetchall(),request.form["drugbank_id"],request.form["measurement"], request.form["min"],request.form["max"])
+        return render_template('viewSearched.html',table=table)
 
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
 def drugsViewAll():
@@ -271,6 +280,24 @@ def sider():
             GROUP BY B.drugbank_id) AS T)",request.form["keyword"])
             table=('drugLeastSider',cur.fetchall(),request.form["keyword"])
             return render_template('viewSearched.html',table=table)
+
+@app.route('/doi',methods=['GET'])
+def doi():
+    cur = mysql.connection.cursor()
+    cur.execute("select B.doi, C.authors \
+    FROM Bindings B, (SELECT reaction_id,group_concat(username) AS authors FROM Contributors GROUP BY reaction_id) C \
+    WHERE B.reaction_id=C.reaction_id")
+    table=('doi',cur.fetchall())
+    return render_template('viewAll.html',table=table)
+
+@app.route('/institutes',methods=['GET'])
+def institutes():
+    cur = mysql.connection.cursor()
+    cur.execute("SELECT * FROM Points ORDER BY score DESC")
+    table=('institutes',cur.fetchall())
+    return render_template('viewAll.html',table=table)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

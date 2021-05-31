@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<style>
+    table, th, td {
+        border: 1px solid black;
+        border-collapse: collapse;
+    }
+    
+    td {
+        text-align: center; 
+        vertical-align: middle;
+    }
+</style>
+<center><h1>Filter targets of a drug with specific measurement and affinities</h1></center>
+{% endblock %}
+
+
+{% block body %}
+<center>
+    <form id='filterTarget' action="/drugs/filterTargets" method='post'>
+        <input type="text" placeholder="Drugbank ID" name="drugbank_id" required>
+        <input type="text" placeholder="Measurement Type" name="measurement" required><br>
+        <input type="text" placeholder="Min Afiinity" name="min" required>
+        <input type="text" placeholder="Max Affinity" name="max" required>
+        <button type='submit'>Search</button>
+    </form>  
+</center>
+{% endblock %}

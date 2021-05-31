@@ -25,6 +25,14 @@
 <center><h1>View Drugs that Affect the Same Protein</h1></center>
 {% endif %} 
 
+{% if table[0]=='doi' %} 
+<center><h1>View the DOI of Papers and Contributors of the Corresponding Paper</h1></center>
+{% endif %} 
+
+{% if table[0]=='institutes' %} 
+<center><h1>View Institutes According to Their Total Scores in Decreasing Order</h1></center>
+{% endif %} 
+
 {% endblock %}
 
 
@@ -54,6 +62,20 @@
     <tr>
         <th>Drugbank ID</th> 
         <th>UniProt IDs</th>
+    </tr>  
+    {% endif %}
+
+    {% if table[0]=='doi' %} 
+    <tr>
+        <th>Doi</th> 
+        <th>Authors</th>
+    </tr>  
+    {% endif %}
+
+    {% if table[0]=='institutes' %} 
+    <tr>
+        <th>Institute</th> 
+        <th>Score</th>
     </tr>  
     {% endif %}
 
