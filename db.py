@@ -90,44 +90,39 @@ cur.execute("CREATE TABLE Points( \
     "delete from DrugCausedSideEffect S where S.drugbank_id=OLD.drugbank_id; \n "\
     "end \n " )"""
 
-"""cur.execute("delimiter // \
-    create trigger deleteprotein after delete on UniProt for each row \
-    begin \
-    delete from Bindings B where B.uniprot_id=OLD.uniprot_id; \
-    end// \
-    delimiter ;")
+"""cur.execute(
+    "create trigger deleteprotein after delete on UniProt for each row \n " \
+    "begin \n " \
+    "delete from Bindings B where B.uniprot_id=OLD.uniprot_id; \n " \
+    "end \n ")
 
-cur.execute("delimiter // \
-    create trigger addPoints2 after insert on Contributors for each row \
-    begin \
-    update Points P set P.score=P.score+2 where P.institute=NEW.institute; \
-    end// \
-    delimiter ;")
+cur.execute(
+    "create trigger addPoints2 after insert on Contributors for each row \n " \
+    "begin \n " \
+    "update Points P set P.score=P.score+2 where P.institute=NEW.institute; \n " \
+    "end\n " )
 
-cur.execute("delimiter // \
-    create trigger deletePoints2 after delete on Contributors for each row \
-    begin \
-    update Points P set P.score=P.score-2 where P.institute=OLD.institute; \
-    end// \
-    delimiter ;")
+cur.execute(
+    "create trigger deletePoints2 after delete on Contributors for each row \n " \
+    "begin \n " \
+    "update Points P set P.score=P.score-2 where P.institute=OLD.institute; \n " \
+    "end \n " )
 
-cur.execute("delimiter // \
-    create trigger addPoints5 after insert on Bindings for each row \
-    begin \
-    update Points P set P.score=P.score+5 where P.institute=NEW.institute; \
-    end// \
-    delimiter ;")
+cur.execute(
+    "create trigger addPoints5 after insert on Bindings for each row \n " \
+    "begin \n " \
+    "update Points P set P.score=P.score+5 where P.institute=NEW.institute; \n " \
+    "end\n " )
 
 # To do 2: Enforce the constraint that the DatabaseManager table can have at most 5 entries
-cur.execute("delimiter // \
-    create trigger limitDatabaseManager after insert on DatabaseManager for each row \
-    begin \
-    if (select count(*) from DatabaseManager)>5 then begin \
-    delete from DatabaseManager D where D.username=NEW.username; \
-    end; \
-    end if; \
-    end// \
-    delimiter ;")
+cur.execute(
+    "create trigger limitDatabaseManager after insert on DatabaseManager for each row \n " \
+    "begin \n " \
+    "if (select count(*) from DatabaseManager)>5 then begin \n " \
+    "delete from DatabaseManager D where D.username=NEW.username; \n " \
+    "end; \n " \
+    "end if; \n " \
+    "end\n " )
 """
 
 # TODO: Trigger to add institute after adding new user

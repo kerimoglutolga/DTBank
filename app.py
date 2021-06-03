@@ -7,7 +7,7 @@ from werkzeug.wrappers import response
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Geronimo766846'
+app.config['MYSQL_PASSWORD'] = 'group4'
 app.config['MYSQL_DB'] = 'dtbank'
 mysql = MySQL(app)
 
@@ -178,8 +178,13 @@ def searchKeywordInDescription():
     else:
         cur = mysql.connection.cursor()
         cur.execute("SELECT drugbank_id,description FROM Drug WHERE description LIKE \'%{}%\'".format(request.form["keyword"]))
-        table=('searchKeywordInDescription',cur.fetchall(),request.form["keyword"])
-        return render_template('viewSearched.html',table=table)
+        data=cur.fetchall()
+        if len(data)==0:
+            success=False
+        else:
+            success=True
+        table=('searchKeywordInDescription',data,request.form["keyword"])
+        return render_template('viewSearched.html',table=table,success=success)
 
 @app.route('/drugs/filterTargets',methods=['GET','POST'])
 def filterTargets():
@@ -188,8 +193,13 @@ def filterTargets():
     else:
         cur = mysql.connection.cursor()
         cur.execute("CALL filterTargets('{}','{}',{},{})".format(request.form["drugbank_id"],request.form["measurement"],request.form["min"],request.form["max"]))
-        table=('filterTargets',cur.fetchall(),request.form["drugbank_id"],request.form["measurement"], request.form["min"],request.form["max"])
-        return render_template('viewSearched.html',table=table)
+        data=cur.fetchall()
+        if len(data)==0:
+            success=False
+        else:
+            success=True
+        table=('filterTargets',data,request.form["drugbank_id"],request.form["measurement"], request.form["min"],request.form["max"])
+        return render_template('viewSearched.html',table=table,success=success)
 
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
 def drugsViewAll():
@@ -197,30 +207,50 @@ def drugsViewAll():
     cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, E.name \
     FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
     WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui")
-    table=('viewAllDrugs',cur.fetchall())
-    return render_template('viewAll.html',table=table)
+    data=cur.fetchall()
+    if len(data)==0:
+        success=False
+    else:
+        success=True
+    table=('viewAllDrugs',data)
+    return render_template('viewAll.html',table=table,success=success)
 
 @app.route('/drugs/viewOtherOptionsDrugs',methods=['POST'])
 def viewDrugInteractionResults():
 
     if request.form['Type']=='interactions':
         cur = mysql.connection.cursor()
-        cur.execute("SELECT I.interactee_id,D.name FROM Interacts I, Drug D WHERE I.interactor_id=%s AND \
-            I.interactee_id=D.drugbank_id",request.form['drugbank_id'])
-        table=(request.form['Type'], cur.fetchall(),request.form['drugbank_id'])
-        return render_template('viewSearched.html',table=table)
+        cur.execute("SELECT I.interactee_id,D.name FROM Interacts I, Drug D WHERE I.interactor_id='{}' AND \
+            I.interactee_id=D.drugbank_id".format(request.form['drugbank_id']))
+        data=cur.fetchall()
+        if len(data)==0:
+            success=False
+        else:
+            success=True
+        table=(request.form['Type'], data,request.form['drugbank_id'])
+        return render_template('viewSearched.html',table=table,success=success)
 
     elif request.form['Type']=='side effects':
         cur = mysql.connection.cursor()
         cur.execute("SELECT N.name,S.umls_cui FROM DrugCausedSideEffect S, SideEffectName N WHERE \
-            S.drugbank_id=%s AND S.umls_cui=N.umls_cui",request.form['drugbank_id'])
-        table=(request.form['Type'], cur.fetchall(),request.form['drugbank_id'])
-        return render_template('viewSearched.html',table=table)
+            S.drugbank_id='{}' AND S.umls_cui=N.umls_cui".format(request.form['drugbank_id']))
+        data=cur.fetchall()
+        if len(data)==0:
+            success=False
+        else:
+            success=True
+        table=(request.form['Type'], data,request.form['drugbank_id'])
+        return render_template('viewSearched.html',table=table,success=success)
     else:
         cur = mysql.connection.cursor()
-        cur.execute("SELECT uniprot_id, target_name FROM Bindings WHERE drugbank_id=%s",request.form['drugbank_id'])
-        table=(request.form['Type'], cur.fetchall(),request.form['drugbank_id'])
-        return render_template('viewSearched.html',table=table)
+        cur.execute("SELECT uniprot_id, target_name FROM Bindings WHERE drugbank_id='{}'".format(request.form['drugbank_id']))
+        data=cur.fetchall()
+        if len(data)==0:
+            success=False
+        else:
+            success=True
+        table=(request.form['Type'], data,request.form['drugbank_id'])
+        return render_template('viewSearched.html',table=table,success=success)
     
 @app.route('/proteins',methods=['GET'])
 def proteinsOptions():
@@ -236,24 +266,39 @@ def drugsForSameProtein():
     cur = mysql.connection.cursor()
     cur.execute("SELECT U.uniprot_id,GROUP_CONCAT(DISTINCT B.drugbank_id) FROM \
         UniProt U LEFT JOIN Bindings B ON U.uniprot_id=B.uniprot_id GROUP BY U.uniprot_id")
-    table=('drugsForSameProtein', cur.fetchall())
-    return render_template('viewAll.html',table=table)
+    data=cur.fetchall()
+    if len(data)==0:
+        success=False
+    else:
+        success=True
+    table=('drugsForSameProtein', data)
+    return render_template('viewAll.html',table=table,success=success)
 
 @app.route('/proteins/proteinsForSameDrug',methods=['GET'])
 def proteinsForSameDrug():
     cur = mysql.connection.cursor()
     cur.execute("SELECT D.drugbank_id,GROUP_CONCAT(DISTINCT B.uniprot_id) FROM \
     Drug D LEFT JOIN Bindings B ON B.drugbank_id=D.drugbank_id GROUP BY D.drugbank_id")
-    table=('proteinsForSameDrug',cur.fetchall())
-    return render_template('viewAll.html',table=table)
+    data=cur.fetchall()
+    if len(data)==0:
+        success=False
+    else:
+        success=True
+    table=('proteinsForSameDrug',data)
+    return render_template('viewAll.html',table=table,success=success)
 
 @app.route('/proteins/aProteinInteractedDrugs',methods=['POST'])
 def aProteinInteractedDrugs():
     cur = mysql.connection.cursor()
     cur.execute("SELECT D.drugbank_id,D.name FROM Bindings B,Drug D \
-        WHERE B.uniprot_id=%s AND D.drugbank_id=B.drugbank_id GROUP BY D.drugbank_id,D.name",request.form['uniprot_id'])
-    table=('aProteinInteractedDrugs', cur.fetchall(),request.form['uniprot_id'])
-    return render_template('viewSearched.html',table=table)
+        WHERE B.uniprot_id='{}' AND D.drugbank_id=B.drugbank_id GROUP BY D.drugbank_id,D.name".format(request.form['uniprot_id']))
+    data=cur.fetchall()
+    if len(data)==0:
+        success=False
+    else:
+        success=True
+    table=('aProteinInteractedDrugs', data,request.form['uniprot_id'])
+    return render_template('viewSearched.html',table=table,success=success)
 
 @app.route('/sider',methods=['GET','POST'])
 def sider():
@@ -263,23 +308,33 @@ def sider():
         if request.form["Type"]=='drugsWithSameSider':
             cur = mysql.connection.cursor()
             cur.execute("SELECT D.drugbank_id, D.name FROM DrugCausedSideEffect S, Drug D \
-            WHERE D.drugbank_id=S.drugbank_id AND S.umls_cui=%s",request.form["keyword"])
-            table=('aSiderForDrugs',cur.fetchall(),request.form["keyword"])
-            return render_template('viewSearched.html',table=table)
+            WHERE D.drugbank_id=S.drugbank_id AND S.umls_cui='{}'".format(request.form["keyword"]))
+            data=cur.fetchall()
+            if len(data)==0:
+                success=False
+            else:
+                success=True
+            table=('aSiderForDrugs',data,request.form["keyword"])
+            return render_template('viewSearched.html',table=table,success=success)
         else:
             cur = mysql.connection.cursor()
             cur.execute("SELECT D.drugbank_id, D.name FROM \
             (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
             (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
-            WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id=%s  \
+            WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='{}'  \
             GROUP BY B.drugbank_id) AS T, Drug D \
             WHERE T.drugbank_id=D.drugbank_id AND T.number=(SELECT min(T.number) FROM \
             (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
             (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
             WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='u' \
-            GROUP BY B.drugbank_id) AS T)",request.form["keyword"])
-            table=('drugLeastSider',cur.fetchall(),request.form["keyword"])
-            return render_template('viewSearched.html',table=table)
+            GROUP BY B.drugbank_id) AS T)".format(request.form["keyword"]))
+            data=cur.fetchall()
+            if len(data)==0:
+                success=False
+            else:
+                success=True
+            table=('drugLeastSider',data,request.form["keyword"])
+            return render_template('viewSearched.html',table=table,success=success)
 
 @app.route('/doi',methods=['GET'])
 def doi():
@@ -287,15 +342,25 @@ def doi():
     cur.execute("select B.doi, C.authors \
     FROM Bindings B, (SELECT reaction_id,group_concat(username) AS authors FROM Contributors GROUP BY reaction_id) C \
     WHERE B.reaction_id=C.reaction_id")
-    table=('doi',cur.fetchall())
-    return render_template('viewAll.html',table=table)
+    data=cur.fetchall()
+    if len(data)==0:
+        success=False
+    else:
+        success=True
+    table=('doi',data)
+    return render_template('viewAll.html',table=table,success=success)
 
 @app.route('/institutes',methods=['GET'])
 def institutes():
     cur = mysql.connection.cursor()
     cur.execute("SELECT * FROM Points ORDER BY score DESC")
-    table=('institutes',cur.fetchall())
-    return render_template('viewAll.html',table=table)
+    data=cur.fetchall()
+    if len(data)==0:
+        success=False
+    else:
+        success=True
+    table=('institutes',data)
+    return render_template('viewAll.html',table=table,success=success)
 
 
 

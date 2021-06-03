@@ -50,6 +50,7 @@
 
 {% block body %}
 <center>
+{% if success %}
 <table>
 
 {% if table[0]=='interactions' %} 
@@ -116,6 +117,9 @@
           </tr>
     {% endfor %}
 </table>
+{% else %} 
+<label>No matching entry found</label>
+{% endif %}
 </center>
 {% endblock %}
     
