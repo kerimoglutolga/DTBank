@@ -38,6 +38,7 @@
 
 {% block body %}
 <center>
+{% if success %}
 <table>
 
   {% if table[0]=='viewAllDrugs' %} 
@@ -87,5 +88,8 @@
           </tr>
     {% endfor %}
 </table>
+{% else %}
+<label>No matching entry is found</label>
+{% endif %}
 </center>
 {% endblock %}
