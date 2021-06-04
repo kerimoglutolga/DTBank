@@ -4,10 +4,10 @@ import MySQLdb
  # Enter your password and database name for the last two parameters, respectively
 
 
-con = MySQLdb.connect('localhost', 'root', 'Geronimo766846','dtbank')
+con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
 cur = con.cursor()
 # Following code creates the refined tables
-"""cur.execute("CREATE TABLE User( \
+cur.execute("CREATE TABLE User( \
     username VARCHAR(30), \
     institute VARCHAR(100), \
     password CHAR(64), \
@@ -51,10 +51,10 @@ cur.execute("CREATE TABLE DrugCausedSideEffect( \
     drugbank_id CHAR(7), \
     PRIMARY KEY(umls_cui,drugbank_id), \
     FOREIGN KEY (drugbank_id) REFERENCES Drug(drugbank_id) ON DELETE CASCADE ON UPDATE CASCADE, \
-    FOREIGN KEY (umls_cui) REFERENCES SideEffectName(umls_cui) ON DELETE CASCADE ON UPDATE CASCADE)")"""
+    FOREIGN KEY (umls_cui) REFERENCES SideEffectName(umls_cui) ON DELETE CASCADE ON UPDATE CASCADE)")
 
 
-"""cur.execute("CREATE TABLE Bindings( \
+cur.execute("CREATE TABLE Bindings( \
     reaction_id INTEGER, \
     measure VARCHAR(4), \
     affinity_nM INTEGER, \
@@ -78,19 +78,19 @@ cur.execute("CREATE TABLE Contributors( \
 cur.execute("CREATE TABLE Points( \
     institute VARCHAR(100), \
     score INTEGER, \
-    PRIMARY KEY (institute))")"""
+    PRIMARY KEY (institute))")
 
 
 # To do 1: Add the triggers
-"""cur.execute(
+cur.execute(
     "create trigger deletedrug after delete on Drug for each row \n " \
     "begin \n" \
     "delete from Interacts where interactee_id=OLD.drugbank_id; \n "\
     "delete from Bindings B where B.drugbank_id=OLD.drugbank_id; \n" \
     "delete from DrugCausedSideEffect S where S.drugbank_id=OLD.drugbank_id; \n "\
-    "end \n " )"""
+    "end \n " )
 
-"""cur.execute(
+cur.execute(
     "create trigger deleteprotein after delete on UniProt for each row \n " \
     "begin \n " \
     "delete from Bindings B where B.uniprot_id=OLD.uniprot_id; \n " \
@@ -123,16 +123,18 @@ cur.execute(
     "end; \n " \
     "end if; \n " \
     "end\n " )
-"""
+
 
 # TODO: Trigger to add institute after adding new user
-"""cur.execute("create trigger insertPoint after insert on User for each row \n " \
+cur.execute("create trigger insertPoint after insert on User for each row \n " \
     "begin \n" \
     "insert into Points values (NEW.institute,0); \n "\
-    "end \n ")"""
+    "end \n ")
 
 # stored procedure, sql'de delimiterla yapılıyo
-"""cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
+cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
     "begin \n" \
     "SELECT uniprot_id,target_name FROM Bindings WHERE drugbank_id=Drugid AND measure=Measurement AND affinity_nM<=MaxVal AND affinity_nM>=Minval;\n" \
-    "end \n ")"""
+    "end \n ")
+
+con.commit()
