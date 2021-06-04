@@ -50,6 +50,7 @@ def add_user():
         try:
             cur.execute("INSERT INTO User(username, password, institute) \
             VALUES (%s, %s, %s)", params)
+            mysql.connection.commit()
         except mysql.connection.Error as err:
             return render_template('adduser.html', error=True)
         return render_template('manager.html', added_user=True)
@@ -79,7 +80,7 @@ def update_drug():
         drugbank_id = request.form['drugid']
         affinity = request.form['affinity']
         cur = mysql.connection.cursor()
-        cur.execute("UPDATE Bindings SET affinity_nM = %s WHERE drugbank_id = %s", (affinity, drugbank_id))
+        cur.execute("UPDATE Bindings SET affinity_nM = %s WHERE reaction_id = %s", (affinity, drugbank_id))
         cur.execute("SELECT ROW_COUNT()")
         rc = int(cur.fetchone()[0])
         mysql.connection.commit()
@@ -147,10 +148,10 @@ def browse_db(subpath):
             GROUP BY S.umls_cui, S.name')
         return render_template('view.html', sider=True, table=cur.fetchall())
     if subpath == 'papers':
-        cur.execute('SELECT B.doi, group_concat(C.username)\
+        cur.execute('SELECT B.doi, B.reaction_id, group_concat(C.username)\
             FROM Bindings B, Contributors C \
             WHERE B.reaction_id = C.reaction_id \
-            GROUP B.doi')
+            GROUP BY B.doi, B.reaction_id')
         return render_template('view.html', papers=True, table=cur.fetchall())
     if subpath == 'drugs':
         cur.execute('SELECT D.drugbank_id, D.name, D.description\
@@ -158,7 +159,7 @@ def browse_db(subpath):
         return render_template('view.html', drugs=True, table=cur.fetchall())
     if subpath == 'drugtarget':
         cur.execute('SELECT I.interactor_id, group_concat(I.interactee_id)\
-            FROM Interacts I')
+            FROM Interacts I GROUP BY I.interactor_id')
         return render_template('view.html', interact=True, table=cur.fetchall())
 
 
@@ -204,9 +205,10 @@ def filterTargets():
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
 def drugsViewAll():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, E.name \
+    cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, group_concat(E.name) \
     FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
-    WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui")
+    WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui \
+    GROUP BY D.drugbank_id, D.name, D.smiles, D.description, T.target_name")
     data=cur.fetchall()
     if len(data)==0:
         success=False
@@ -318,7 +320,7 @@ def sider():
             return render_template('viewSearched.html',table=table,success=success)
         else:
             cur = mysql.connection.cursor()
-            cur.execute("SELECT D.drugbank_id, D.name FROM \
+            """cur.execute("SELECT D.drugbank_id, D.name FROM \
             (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
             (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
             WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='{}'  \
@@ -327,7 +329,14 @@ def sider():
             (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
             (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
             WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='u' \
-            GROUP BY B.drugbank_id) AS T)".format(request.form["keyword"]))
+            GROUP BY B.drugbank_id) AS T)".format(request.form["keyword"]))"""
+
+            cur.execute("SELECT D.drugbank_id, D.name FROM Drug D, \
+            (SELECT X.drugbank_id FROM (SELECT drugbank_id, COUNT(*) AS secount FROM drugcausedsideeffect  \
+            WHERE drugbank_id IN (SELECT drugbank_id FROM Bindings WHERE uniprot_id = %s GROUP BY drugbank_id) GROUP BY drugbank_id) AS X \
+            WHERE X.secount = (SELECT MIN(T.secount) FROM (SELECT drugbank_id, COUNT(*) AS secount FROM drugcausedsideeffect  \
+            WHERE drugbank_id IN (SELECT drugbank_id FROM Bindings WHERE uniprot_id = %s GROUP BY drugbank_id) GROUP BY drugbank_id) AS T)) as Y \
+            WHERE D.drugbank_id = Y.drugbank_id", (request.form["keyword"], request.form["keyword"]))
             data=cur.fetchall()
             if len(data)==0:
                 success=False
@@ -341,7 +350,8 @@ def doi():
     cur = mysql.connection.cursor()
     cur.execute("select B.doi, C.authors \
     FROM Bindings B, (SELECT reaction_id,group_concat(username) AS authors FROM Contributors GROUP BY reaction_id) C \
-    WHERE B.reaction_id=C.reaction_id")
+    WHERE B.reaction_id=C.reaction_id \
+    GROUP BY B.doi, C.authors")
     data=cur.fetchall()
     if len(data)==0:
         success=False

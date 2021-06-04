@@ -21,12 +21,12 @@
 {% endif %}
 {% if affinity == True %}
   <center>
-      <h1>Update Drug</h1>
-      {% if success is defined and success == True %} <h3>Drug Updated Successfully!</h3> 
-      {% elif success is defined and success == False %} <h3>There is no drug with that id!</h3> 
+      <h1>Update Reaction</h1>
+      {% if success is defined and success == True %} <h3>Reaction Updated Successfully!</h3> 
+      {% elif success is defined and success == False %} <h3>There is no reaction with that id!</h3> 
       {% endif %}
       <form id='login-form' action="" method='post'>
-        <input type="text" placeholder="ID of the drug to update" name="drugid" required>
+        <input type="text" placeholder="ID of the reaction to update" name="drugid" required>
         <input type="text" placeholder="New Affinity Value" name="affinity" required>
         <button type='submit'>Update Drug</button>
       </form>

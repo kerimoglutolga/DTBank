@@ -47,11 +47,16 @@ wb = xlrd.open_workbook(loc)
     drugbank_id, name, description = tuple([field.value for field in sheet.row_slice(i, 0, 3)])
     sheet = wb.sheet_by_index(2)
     for row in sheet.get_rows():
+        entered = False
         if row[1].value == drugbank_id:
+            entered = True
             cur.execute('INSERT IGNORE INTO Drug \
                 VALUES(%s, %s, %s, %s)', (drugbank_id, name,description, row[4].value))
-            con.commit()"""
-
+            con.commit()
+        if entered == False:
+            cur.execute('INSERT IGNORE INTO Drug \
+                VALUES(%s, %s, %s, NULL)', (drugbank_id, name,description))
+"""
 """for i in range(1,18):
     sheet = wb.sheet_by_index(2)
     reaction_id, drugbank_id, uniprot_id, target_name, smiles, measure, affinity, doi, authors, institute = tuple([field.value for field in sheet.row_slice(i, 0, 10)])
@@ -78,10 +83,29 @@ for i in range(1,79):
     cur.execute("insert ignore into DrugCausedSideEffect values(%s,%s)",(umls_cui,drugbank_id))
     con.commit()"""
     
+cur.execute("SELECT * FROM DatabaseManager")
+res = cur.fetchall()
+for row in res:
+    hashed_pw = hashlib.sha256(row[1].encode()).hexdigest()
+    cur.execute("UPDATE DatabaseManager SET password = %s WHERE username = %s", (hashed_pw, row[0]))
+con.commit()
 """cur.execute("SELECT * FROM User")
 res = cur.fetchall()
 for row in res:
     hashed_pw = hashlib.sha256(row[2].encode()).hexdigest()
     cur.execute("UPDATE User SET password = %s WHERE username = %s AND institute = %s", (hashed_pw, row[0], row[1]))"""
-    
+
+
+"""sheet = wb.sheet_by_index(3)
+iter = sheet.get_rows()
+next(iter)
+for row in iter:
+    drugbank_id, _, _, interactions = tuple([field.value for field in row])
+    res = interactions.replace("'", "").replace("[", "").replace("]", "")
+    for interactee in res.split(", "):
+        if(res.split(", ")[0] != ""):
+            print(drugbank_id), print(res.split(", "))
+            cur.execute("INSERT IGNORE INTO Interacts \
+                VALUES (%s, %s)", (drugbank_id, interactee))
+con.commit()"""
 
