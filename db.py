@@ -7,7 +7,7 @@ import MySQLdb
 con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
 cur = con.cursor()
 # Following code creates the refined tables
-cur.execute("CREATE TABLE User( \
+"""cur.execute("CREATE TABLE User( \
     username VARCHAR(30), \
     institute VARCHAR(100), \
     password CHAR(64), \
@@ -123,18 +123,18 @@ cur.execute(
     "end; \n " \
     "end if; \n " \
     "end\n " )
+"""
+"""cur.execute("drop trigger insertPoint\n")
 
-
-# TODO: Trigger to add institute after adding new user
 cur.execute("create trigger insertPoint after insert on User for each row \n " \
     "begin \n" \
-    "insert into Points values (NEW.institute,0); \n "\
+    "insert ignore into Points values (NEW.institute,0); \n "\
     "end \n ")
+"""
 
-# stored procedure, sql'de delimiterla yapılıyo
-cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
+"""cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
     "begin \n" \
     "SELECT uniprot_id,target_name FROM Bindings WHERE drugbank_id=Drugid AND measure=Measurement AND affinity_nM<=MaxVal AND affinity_nM>=Minval;\n" \
-    "end \n ")
+    "end \n ")"""
 
 con.commit()
