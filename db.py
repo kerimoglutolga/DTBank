@@ -7,6 +7,7 @@ import MySQLdb
 con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
 cur = con.cursor()
 # Following code creates the refined tables
+
 """cur.execute("CREATE TABLE User( \
     username VARCHAR(30), \
     institute VARCHAR(100), \
@@ -65,7 +66,8 @@ cur.execute("CREATE TABLE Bindings( \
     institute VARCHAR(100), \
     PRIMARY KEY(reaction_id), \
     FOREIGN KEY (drugbank_id) REFERENCES Drug(drugbank_id) ON DELETE CASCADE ON UPDATE CASCADE, \
-    FOREIGN KEY (uniprot_id) REFERENCES UniProt(uniprot_id) ON DELETE CASCADE ON UPDATE CASCADE)")
+    FOREIGN KEY (uniprot_id) REFERENCES UniProt(uniprot_id) ON DELETE CASCADE ON UPDATE CASCADE, \
+    FOREIGN KEY (institute) REFERENCES Points(institute) ON DELETE CASCADE ON UPDATE CASCADE)")
 
 cur.execute("CREATE TABLE Contributors( \
     reaction_id INTEGER, \
