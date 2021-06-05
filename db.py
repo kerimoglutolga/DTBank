@@ -1,14 +1,16 @@
+from app import institutes
 import MySQLdb
 
 # To run the following script, you need to have an active MySQL server running locally. 
  # Enter your password and database name for the last two parameters, respectively
 
 
-con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
+con = MySQLdb.connect('localhost', 'root', 'Geronimo766846','dtbank')
 cur = con.cursor()
 # Following code creates the refined tables
 
-"""cur.execute("CREATE TABLE User( \
+cur.execute("CREATE TABLE User( \
+    name VARCHAR(30), \
     username VARCHAR(30), \
     institute VARCHAR(100), \
     password CHAR(64), \
@@ -54,6 +56,10 @@ cur.execute("CREATE TABLE DrugCausedSideEffect( \
     FOREIGN KEY (drugbank_id) REFERENCES Drug(drugbank_id) ON DELETE CASCADE ON UPDATE CASCADE, \
     FOREIGN KEY (umls_cui) REFERENCES SideEffectName(umls_cui) ON DELETE CASCADE ON UPDATE CASCADE)")
 
+cur.execute("CREATE TABLE Points( \
+    institute VARCHAR(100), \
+    score INTEGER, \
+    PRIMARY KEY (institute))")
 
 cur.execute("CREATE TABLE Bindings( \
     reaction_id INTEGER, \
@@ -77,10 +83,6 @@ cur.execute("CREATE TABLE Contributors( \
     FOREIGN KEY (reaction_id) REFERENCES Bindings(reaction_id) ON DELETE CASCADE ON UPDATE CASCADE, \
     FOREIGN KEY (username, institute) REFERENCES User(username, institute) ON DELETE CASCADE ON UPDATE CASCADE)")
 
-cur.execute("CREATE TABLE Points( \
-    institute VARCHAR(100), \
-    score INTEGER, \
-    PRIMARY KEY (institute))")
 
 
 # To do 1: Add the triggers
@@ -99,22 +101,25 @@ cur.execute(
     "end \n ")
 
 cur.execute(
-    "create trigger addPoints2 after insert on Contributors for each row \n " \
+    "create trigger addPoints2 before insert on Contributors for each row \n " \
     "begin \n " \
+    "if NOT EXISTS (select username,institute from contributors where NEW.username=username AND NEW.institute=institute) then \n " \
+    "begin \n" \
     "update Points P set P.score=P.score+2 where P.institute=NEW.institute; \n " \
+    "end; \n" \
+    "end if; \n " \
     "end\n " )
 
 cur.execute(
     "create trigger deletePoints2 after delete on Contributors for each row \n " \
     "begin \n " \
+    "if NOT EXISTS (select username,institute from contributors where OLD.username=username AND OLD.institute=institute) then \n " \
+    "begin \n" \
     "update Points P set P.score=P.score-2 where P.institute=OLD.institute; \n " \
+    "end; \n" \
+    "end if; \n " \
     "end \n " )
 
-cur.execute(
-    "create trigger addPoints5 after insert on Bindings for each row \n " \
-    "begin \n " \
-    "update Points P set P.score=P.score+5 where P.institute=NEW.institute; \n " \
-    "end\n " )
 
 # To do 2: Enforce the constraint that the DatabaseManager table can have at most 5 entries
 cur.execute(
@@ -125,18 +130,49 @@ cur.execute(
     "end; \n " \
     "end if; \n " \
     "end\n " )
-"""
-"""cur.execute("drop trigger insertPoint\n")
+
+#publicationa gerek olmayabilir
+"""cur.execute("CREATE TABLE Publication( \
+    doi VARCHAR(50), \
+    institute VARCHAR(100), \
+    PRIMARY KEY(doi))")
+
+cur.execute(
+    "create trigger addPoints5 after insert on Publication for each row \n " \
+    "begin \n " \
+    "if NEW.doi NOT IN (select doi from Publication) then \n" \
+    "begin \n"  \
+    "update Points P set P.score=P.score+5 where P.institute=NEW.institute; \n " \
+    "end\n " )
+
+cur.execute("CREATE TRIGGER insertPublication after insert on Bindings for each row \n " \
+    "begin \n " \
+    "if NEW.doi NOT IN (select doi from Publication) then \n" \
+    "begin \n"  \
+    "insert into Publication values(NEW.doi,NEW.institute); \n " \
+    "end; \n "\
+    "end if; \n" \
+    "end \n ")"""
+
+cur.execute("CREATE TRIGGER addPoints5 before insert on Bindings for each row \n " \
+    "begin \n " \
+    "if NEW.doi NOT IN (select doi from Bindings) then \n" \
+    "begin \n"  \
+    "update Points P set P.score=P.score+5 where P.institute=NEW.institute; \n " \
+    "end; \n "\
+    "end if; \n" \
+    "end \n ")
 
 cur.execute("create trigger insertPoint after insert on User for each row \n " \
     "begin \n" \
     "insert ignore into Points values (NEW.institute,0); \n "\
     "end \n ")
-"""
 
-"""cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
+
+cur.execute("CREATE PROCEDURE filterTargets (in Drugid CHAR(7), in Measurement VARCHAR(4),in Minval integer, in Maxval integer) \n" \
     "begin \n" \
     "SELECT uniprot_id,target_name FROM Bindings WHERE drugbank_id=Drugid AND measure=Measurement AND affinity_nM<=MaxVal AND affinity_nM>=Minval;\n" \
-    "end \n ")"""
+    "end \n ")
+
 
 con.commit()

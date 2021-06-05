@@ -7,7 +7,7 @@ from werkzeug.wrappers import response
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'group4'
+app.config['MYSQL_PASSWORD'] = 'Geronimo766846'
 app.config['MYSQL_DB'] = 'dtbank'
 mysql = MySQL(app)
 
