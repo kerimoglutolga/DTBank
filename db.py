@@ -131,28 +131,6 @@ cur.execute(
     "end if; \n " \
     "end\n " )
 
-#publicationa gerek olmayabilir
-"""cur.execute("CREATE TABLE Publication( \
-    doi VARCHAR(50), \
-    institute VARCHAR(100), \
-    PRIMARY KEY(doi))")
-
-cur.execute(
-    "create trigger addPoints5 after insert on Publication for each row \n " \
-    "begin \n " \
-    "if NEW.doi NOT IN (select doi from Publication) then \n" \
-    "begin \n"  \
-    "update Points P set P.score=P.score+5 where P.institute=NEW.institute; \n " \
-    "end\n " )
-
-cur.execute("CREATE TRIGGER insertPublication after insert on Bindings for each row \n " \
-    "begin \n " \
-    "if NEW.doi NOT IN (select doi from Publication) then \n" \
-    "begin \n"  \
-    "insert into Publication values(NEW.doi,NEW.institute); \n " \
-    "end; \n "\
-    "end if; \n" \
-    "end \n ")"""
 
 cur.execute("CREATE TRIGGER addPoints5 before insert on Bindings for each row \n " \
     "begin \n " \

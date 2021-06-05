@@ -35,14 +35,6 @@ for i in range(1,10):
         VALUES (%s, %s)", (uniprot_id, seq))
     con.commit()
 
-#yukarısının aynısı
-"""for i in range(1,10):
-    sheet = wb.sheet_by_index(5)
-    uniprot_id, seq= tuple([field.value for field in sheet.row_slice(i, 0, 2)])
-    cur.execute("INSERT INTO UniProt \
-        VALUES (%s, %s)", (uniprot_id, seq))
-    con.commit()"""
-
 for i in range(1,13):
     sheet = wb.sheet_by_index(3)
     drugbank_id, name, description = tuple([field.value for field in sheet.row_slice(i, 0, 3)])
