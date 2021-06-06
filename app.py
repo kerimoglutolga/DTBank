@@ -7,7 +7,7 @@ from werkzeug.wrappers import response
 app = Flask(__name__)
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'Geronimo766846'
+app.config['MYSQL_PASSWORD'] = 'group4'
 app.config['MYSQL_DB'] = 'dtbank'
 mysql = MySQL(app)
 
@@ -205,7 +205,7 @@ def filterTargets():
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
 def drugsViewAll():
     cur = mysql.connection.cursor()
-    cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, group_concat(E.name) \
+    cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, group_concat(E.name separator ', ') \
     FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
     WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui \
     GROUP BY D.drugbank_id, D.name, D.smiles, D.description, T.target_name")
@@ -348,10 +348,10 @@ def sider():
 @app.route('/doi',methods=['GET'])
 def doi():
     cur = mysql.connection.cursor()
-    cur.execute("select B.doi, C.authors \
-    FROM Bindings B, (SELECT reaction_id,group_concat(username) AS authors FROM Contributors GROUP BY reaction_id) C \
-    WHERE B.reaction_id=C.reaction_id \
-    GROUP BY B.doi, C.authors")
+    cur.execute("select B.doi, group_concat(distinct U.name separator ';') \
+    FROM Bindings B, (SELECT reaction_id,username FROM Contributors) C, User U \
+    WHERE B.reaction_id=C.reaction_id AND U.username=C.username\
+    GROUP BY B.doi")
     data=cur.fetchall()
     if len(data)==0:
         success=False

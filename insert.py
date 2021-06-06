@@ -5,7 +5,7 @@ import hashlib
 # To run the following script, you need to have an active MySQL server running locally. 
  # Enter your password and database name for the last two parameters, respectively
 
-con = MySQLdb.connect('localhost', 'root', 'Geronimo766846','dtbank')
+con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
 cur = con.cursor()
 
 loc = ("data.xls")

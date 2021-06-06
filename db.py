@@ -5,7 +5,7 @@ import MySQLdb
  # Enter your password and database name for the last two parameters, respectively
 
 
-con = MySQLdb.connect('localhost', 'root', 'Geronimo766846','dtbank')
+con = MySQLdb.connect('localhost', 'root', 'group4','dtbank')
 cur = con.cursor()
 # Following code creates the refined tables
 
