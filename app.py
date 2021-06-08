@@ -44,12 +44,11 @@ def add_user():
         return render_template('adduser.html')
     else:
         hashed_pw = hashlib.sha256(request.form['Password'].encode()).hexdigest()
-        params =  (request.form['Username'], hashed_pw, request.form['Institute'])
-        print(params)
+        params =  (request.form["Name"], request.form['Username'],  request.form['Institute'], hashed_pw)
         cur = mysql.connection.cursor()
         try:
-            cur.execute("INSERT INTO User(username, password, institute) \
-            VALUES (%s, %s, %s)", params)
+            cur.execute("INSERT INTO User(name, username, institute, password) \
+            VALUES (%s, %s, %s, %s)", params)
             mysql.connection.commit()
         except mysql.connection.Error as err:
             return render_template('adduser.html', error=True)
@@ -111,6 +110,8 @@ def contrib():
         reaction_id = request.form['reactionid']
         username = request.form['contrib']
         institute = request.form['institute']
+        password = request.form['password']
+        name = request.form['name']
         cur = mysql.connection.cursor()
         rc = 1
         if 'delete' in request.form:
@@ -119,6 +120,9 @@ def contrib():
             cur.execute("SELECT ROW_COUNT()")
             rc = int(cur.fetchone()[0])
         if 'add' in request.form:
+            password = hashlib.sha256(password.encode()).hexdigest()
+            cur.execute("INSERT IGNORE INTO User (name, username, institute, password) \
+                VALUES (%s, %s, %s, %s)", (name, username, institute, password))
             try:
                 cur.execute("INSERT INTO Contributors (reaction_id, username, institute) \
                 VALUES (%s, %s, %s)", (reaction_id, username, institute))
@@ -148,10 +152,10 @@ def browse_db(subpath):
             GROUP BY S.umls_cui, S.name')
         return render_template('view.html', sider=True, table=cur.fetchall())
     if subpath == 'papers':
-        cur.execute('SELECT B.doi, B.reaction_id, group_concat(C.username)\
-            FROM Bindings B, Contributors C \
-            WHERE B.reaction_id = C.reaction_id \
-            GROUP BY B.doi, B.reaction_id')
+        cur.execute("SELECT B.doi, B.reaction_id, group_concat(U.name separator '; ')\
+            FROM Bindings B, Contributors C, User U \
+            WHERE U.username = C.username AND B.reaction_id = C.reaction_id \
+            GROUP BY B.doi, B.reaction_id")
         return render_template('view.html', papers=True, table=cur.fetchall())
     if subpath == 'drugs':
         cur.execute('SELECT D.drugbank_id, D.name, D.description\
@@ -206,7 +210,8 @@ def filterTargets():
 def drugsViewAll():
     cur = mysql.connection.cursor()
     cur.execute("SELECT D.drugbank_id, D.name, D.smiles, D.description, T.target_name, group_concat(E.name separator ', ') \
-    FROM Drug D, (SELECT drugbank_id,target_name FROM Bindings) T, DrugCausedSideEffect S, SideEffectName E \
+    FROM Drug D, (SELECT X.drugbank_id,group_concat(X.target_name) as target_name FROM (SELECT drugbank_id, target_name FROM Bindings \
+    GROUP BY drugbank_id, target_name) X GROUP BY drugbank_id) T, DrugCausedSideEffect S, SideEffectName E \
     WHERE D.drugbank_id=S.drugbank_id AND D.drugbank_id=T.drugbank_id AND S.umls_cui=E.umls_cui \
     GROUP BY D.drugbank_id, D.name, D.smiles, D.description, T.target_name")
     data=cur.fetchall()

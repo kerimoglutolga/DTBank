@@ -15,7 +15,9 @@
     {% endif %}
     <form id='login-form' action="" method='post'>
     <input type="text" placeholder="Reaction ID to update" name="reactionid" required>
-    <input type="text" placeholder="Name of the contributor to add/delete" name="contrib" required>
+    <input type="text" placeholder="Username of the contributor to add/delete" name="contrib" required>
+    <input type="text" placeholder="Name of the contributor to add/delete" name="name" required>
+    <input type="text" placeholder="Password of the contributor" name="password" required>
     <input type="text" placeholder="Institute of the contributor to add/delete" name="institute" required>
     <button type='submit' name="delete">Delete Contributor</button>
     <button type='submit' name="add">Add Contributor</button>
