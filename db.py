@@ -32,8 +32,7 @@ cur.execute("CREATE TABLE Drug( \
     description TEXT, \
     smiles VARCHAR(200), \
     PRIMARY KEY(drugbank_id), \
-    UNIQUE(name), \
-    UNIQUE(smiles))")
+    UNIQUE(name))")
 
 
 cur.execute("CREATE TABLE Interacts ( \
