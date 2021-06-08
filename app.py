@@ -325,17 +325,6 @@ def sider():
             return render_template('viewSearched.html',table=table,success=success)
         else:
             cur = mysql.connection.cursor()
-            """cur.execute("SELECT D.drugbank_id, D.name FROM \
-            (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
-            (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
-            WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='{}'  \
-            GROUP BY B.drugbank_id) AS T, Drug D \
-            WHERE T.drugbank_id=D.drugbank_id AND T.number=(SELECT min(T.number) FROM \
-            (SELECT COUNT(B.drugbank_id) AS number,B.drugbank_id FROM \
-            (SELECT uniprot_id, drugbank_id FROM Bindings GROUP BY uniprot_id, drugbank_id) AS B,DrugCausedSideEffect S \
-            WHERE B.drugbank_id=S.drugbank_id AND B.uniprot_id='u' \
-            GROUP BY B.drugbank_id) AS T)".format(request.form["keyword"]))"""
-
             cur.execute("SELECT D.drugbank_id, D.name FROM Drug D, \
             (SELECT X.drugbank_id FROM (SELECT drugbank_id, COUNT(*) AS secount FROM drugcausedsideeffect  \
             WHERE drugbank_id IN (SELECT drugbank_id FROM Bindings WHERE uniprot_id = %s GROUP BY drugbank_id) GROUP BY drugbank_id) AS X \
