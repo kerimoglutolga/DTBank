@@ -166,15 +166,20 @@ def browse_db(subpath):
             FROM Interacts I GROUP BY I.interactor_id')
         return render_template('view.html', interact=True, table=cur.fetchall())
 
-
+# Returns an html page to view different, drug related searches. For searches that request a interactions, side effects 
+# or targets of a specific drug, in other words, detailed information about a drug, 
+# there is a button to go another options page.
 @app.route('/drugs',methods=['GET'])
 def drugOptions1():
     return render_template('drugOptions1.html')
 
+# Returns an html page where user can type a drugbank id and select one of the three options:
+# interactions, side effects or targets of a drug
 @app.route('/drugs/otherOptions',methods=['GET'])
 def drugOptions2():
     return render_template('drugOptions2.html')
 
+# Returns drugs that contain the given keyword in their descriptions
 @app.route('/drugs/searchKeywordInDescription',methods=['GET','POST'])
 def searchKeywordInDescription():
     if request.method=='GET':
@@ -191,6 +196,8 @@ def searchKeywordInDescription():
         table=('searchKeywordInDescription',data,request.form["keyword"])
         return render_template('viewSearched.html',table=table,success=success)
 
+# Returns interacting targets that have a specific measurement type, minimum affinity value, maximum affinity value
+# of a specific drug. User types all four of these information.
 @app.route('/drugs/filterTargets',methods=['GET','POST'])
 def filterTargets():
     if request.method=='GET':
@@ -206,6 +213,7 @@ def filterTargets():
         table=('filterTargets',data,request.form["drugbank_id"],request.form["measurement"], request.form["min"],request.form["max"])
         return render_template('viewSearched.html',table=table,success=success)
 
+# Returns all drugs with their ids, names, smiles, descriptions, targets and side effects
 @app.route('/drugs/viewAllDrugs',methods=['GET'])
 def drugsViewAll():
     cur = mysql.connection.cursor()
@@ -222,6 +230,7 @@ def drugsViewAll():
     table=('viewAllDrugs',data)
     return render_template('viewAll.html',table=table,success=success)
 
+# Interactions, side effects or target proteins of a specific drug is returned
 @app.route('/drugs/viewOtherOptionsDrugs',methods=['POST'])
 def viewDrugInteractionResults():
 
@@ -249,6 +258,7 @@ def viewDrugInteractionResults():
         table=(request.form['Type'], data,request.form['drugbank_id'])
         return render_template('viewSearched.html',table=table,success=success)
     else:
+        # Target proteins of a specific drug is returned
         cur = mysql.connection.cursor()
         cur.execute("SELECT uniprot_id, target_name FROM Bindings WHERE drugbank_id='{}'".format(request.form['drugbank_id']))
         data=cur.fetchall()
@@ -259,15 +269,20 @@ def viewDrugInteractionResults():
         table=(request.form['Type'], data,request.form['drugbank_id'])
         return render_template('viewSearched.html',table=table,success=success)
     
+# Returns an html page to view different, protein related options
 @app.route('/proteins',methods=['GET'])
 def proteinsOptions():
     return render_template('proteins.html')
 
+# Returns an html page to type a uniprot id so that this id will be used to search interacting 
+# drugs of that protein
 @app.route('/proteins/searchProtein',methods=['GET'])
 def searchProtein():
     keyword='searchProtein'
     return render_template('search.html',keyword=keyword)
 
+# Returns drugs that affect the same protein. If a protein is not affected by any drug, then its uniprot 
+# id is still shown with corresponding drug ids as None
 @app.route('/proteins/drugsForSameProtein',methods=['GET'])
 def drugsForSameProtein():
     cur = mysql.connection.cursor()
@@ -281,6 +296,8 @@ def drugsForSameProtein():
     table=('drugsForSameProtein', data)
     return render_template('viewAll.html',table=table,success=success)
 
+# Returns proteins that bind the same drug. If a drug is not binded by a protein, its drugbankid is
+# still shown with a corresponding uniprot ids as None
 @app.route('/proteins/proteinsForSameDrug',methods=['GET'])
 def proteinsForSameDrug():
     cur = mysql.connection.cursor()
@@ -294,6 +311,7 @@ def proteinsForSameDrug():
     table=('proteinsForSameDrug',data)
     return render_template('viewAll.html',table=table,success=success)
 
+# Returns interacting drugs of a specific protein. The typed uniprot id is used to search drugs that interact with that protein
 @app.route('/proteins/aProteinInteractedDrugs',methods=['POST'])
 def aProteinInteractedDrugs():
     cur = mysql.connection.cursor()
@@ -307,11 +325,14 @@ def aProteinInteractedDrugs():
     table=('aProteinInteractedDrugs', data,request.form['uniprot_id'])
     return render_template('viewSearched.html',table=table,success=success)
 
+# Returns drugs that have the same side effect or drugs that have minimum number of 
+# side effects and interact with the same protein
 @app.route('/sider',methods=['GET','POST'])
 def sider():
     if request.method=='GET':
         return render_template("sider.html")
     else:
+        # Returns drugs that have the same side effect
         if request.form["Type"]=='drugsWithSameSider':
             cur = mysql.connection.cursor()
             cur.execute("SELECT D.drugbank_id, D.name FROM DrugCausedSideEffect S, Drug D \
@@ -324,6 +345,8 @@ def sider():
             table=('aSiderForDrugs',data,request.form["keyword"])
             return render_template('viewSearched.html',table=table,success=success)
         else:
+            # Drugs that have minimum number of 
+            # side effects and interact with the same protein
             cur = mysql.connection.cursor()
             cur.execute("SELECT D.drugbank_id, D.name FROM Drug D, \
             (SELECT X.drugbank_id FROM (SELECT drugbank_id, COUNT(*) AS secount FROM drugcausedsideeffect  \
@@ -339,6 +362,7 @@ def sider():
             table=('drugLeastSider',data,request.form["keyword"])
             return render_template('viewSearched.html',table=table,success=success)
 
+# Returns doi and authors of the papers
 @app.route('/doi',methods=['GET'])
 def doi():
     cur = mysql.connection.cursor()
@@ -354,6 +378,7 @@ def doi():
     table=('doi',data)
     return render_template('viewAll.html',table=table,success=success)
 
+# Returns list of institutes with their scores in descending order
 @app.route('/institutes',methods=['GET'])
 def institutes():
     cur = mysql.connection.cursor()
